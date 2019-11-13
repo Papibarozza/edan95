@@ -1,8 +1,14 @@
 from collections import Counter
 from graphviz import Digraph
+import numpy as np
+import helpers
 
-
-
+class Tree:
+    def __init__(self):
+        self.splitting_criterion = None
+        self.label = None
+        self.children = []
+        
 class ID3DecisionTreeClassifier :
 
 
@@ -16,6 +22,8 @@ class ID3DecisionTreeClassifier :
         # suggested attributes of the classifier to handle training parameters
         self.__minSamplesLeaf = minSamplesLeaf
         self.__minSamplesSplit = minSamplesSplit
+
+        self.__tree = Tree()
 
 
     # Create a new node in the tree with the suggested attributes for the visualisation.
@@ -57,16 +65,54 @@ class ID3DecisionTreeClassifier :
         return None
 
 
+    def buildTree(self,data,target,attributes,classes,node):
+
+        if(len(attributes)==0):
+            node.label = helpers.most_common(target)
+            return node
+        else:
+            split_attr = helpers.get_best_split(target,classes,data,attributes)
+            node.splitting_criterion = split_attr
+            for val in attributes[split_attr] :
+                target_idxs = [ i for i in range(len(data)) if val in data[i] ]
+
+                #To do array indexing...
+                tar = np.array(list(target))
+                dat = np.array(list(data))
+
+                #Partitions data
+                partition_target = tuple(tar[target_idxs])
+                partition = [tuple(elem) for elem in dat[target_idxs]]
+
+                #If it would not result in an empty partition, or we get no new information:
+                if(len(partition)!=0 and (len(partition_target) != len(target)) ):
+                    node.children.append(self.buildTree(partition,partition_target,{key:attributes[key] for key in attributes if key!=split_attr},classes,Tree()))
+                else:
+                    leaf = Tree()
+                    leaf.label = helpers.most_common(target)
+                    node.children.append(leaf) 
+                #connect node to children
+                for child in node.children:
+                    curr_node = {'id': self.__nodeCounter, 'label': child.label, 'attribute': child.splitting_criterion, 'entropy': None, 'samples': None,
+                         'classCounts': None, 'nodes': None}
+                    self.__nodeCounter+=1
+                    self.add_node_to_graph(curr_node,self.__nodeCounter)
+            
+            return node
     # the entry point for the recursive ID3-algorithm, you need to fill in the calls to your recursive implementation
     def fit(self, data, target, attributes, classes):
-
+        
         # fill in something more sensible here... root should become the output of the recursive tree creation
-        root = self.new_ID3_node()
-        self.add_node_to_graph(root)
-
+        root = self.buildTree(data,target,attributes,classes, Tree())
+        for child in root:
+            curr_node = {'id': self.__nodeCounter, 'label': child.label, 'attribute': child.splitting_criterion, 'entropy': None, 'samples': None,
+                    'classCounts': None, 'nodes': None}
+            self.__nodeCounter+=1
+        self.add_node_to_graph(curr_node,self.__nodeCounter)
+        
         return root
 
-
+        
 
     def predict(self, data, tree) :
         predicted = list()

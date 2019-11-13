@@ -9,7 +9,7 @@ from sklearn import tree, metrics, datasets
 import os
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeClassifier
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+os.environ["PATH"] += os.pathsep +'C:/Users/Arvid/Anaconda3/envs/lab2/Library/bin/graphviz/'
 from graphviz import Digraph
 
 def render_tree(clf,name="mytree"):
