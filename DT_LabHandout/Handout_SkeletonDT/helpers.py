@@ -1,10 +1,6 @@
-import ToyData as td
-import ID3
-import math
 import numpy as np
-from sklearn import tree, metrics, datasets
-import os
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+import ToyData as td
+import math
 def entropy(target,classes):
   if(len(target) == 0):
     return 0
@@ -26,7 +22,7 @@ def information_gain(target,classes,data,attributes):
   attr_entrop = [0]*len(attributes)
   for i,attr in enumerate(attributes):
     curr_sum = 0
-    for val in attr:
+    for val in attributes[attr]:
       target_idxs = [ i for i in range(len(data)) if val in data[i] ]
       print(target_idxs)
       tar = np.array(list(target))
@@ -35,15 +31,7 @@ def information_gain(target,classes,data,attributes):
     curr_sum = 0
   return attr_entrop
 
-      
-def main():
 
-    attributes, classes, data, target, data2, target2 = td.ToyData().get_data()
-
-    id3 = ID3.ID3DecisionTreeClassifier()
-
-    #myTree = id3.fit(data, target, attributes, classes)
-    print(information_gain(target,classes,data,attributes))
-
-
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+   attributes, classes, data, target, data2, target2 = td.ToyData().get_data()
+   print(information_gain(target,classes,data,attributes))
